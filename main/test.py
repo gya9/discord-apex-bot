@@ -3,13 +3,14 @@ import cog.commandcog as commandCog
 from discord.ext import commands
 
 from keys import *
+from token import *
 
 bot = commands.Bot(command_prefix='!')
 
 @bot.event
 async def on_ready():
     print('Logged on as {0}!'.format(bot.user))
-    guild = bot.get_guild(664685353348628481)
+    guild = bot.get_guild(guild_id)
 
     commandCog.setup(bot)
 
