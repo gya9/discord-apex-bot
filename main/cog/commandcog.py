@@ -18,11 +18,17 @@ class CommandCog(commands.Cog):
             if voice_channel != None:
                 invite = await voice_channel.create_invite(reason='!lfg')
 
+                message = message.lower()
+
+                rank_search_list = [['b'],['s'],['g'],['p'],['d']]
+                rank_str_list = [' bronze',' silver',' gold',' platinum',' diamond']
+
                 if re.search(r'^[bsgpd][1-4]$', message, re.IGNORECASE):
-                    if message[0] in ['b','B']:
-                        await ctx.send(invite.url + ' bronze' + message[-1])
-                    return
-            
+                    for i in range(len(rank_search_list)):
+                        if message[0] in rank_search_list[i]:
+                            await ctx.send(invite.url + rank_str_list[i] + message[-1])
+                            return
+
                 await ctx.send('お前はカス(ランク指定を間違っている)')
 
 
