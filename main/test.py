@@ -87,17 +87,21 @@ async def on_raw_reaction_add(payload):
             await member.remove_roles(role_remove)
 
     if payload.message_id == quick_lfg_msg:  # クイック募集ボタン
+        try:
+            voice_channel = ctx.author.voice.channel
+        except AttributeError:
+            for reaction in message.reactions: #リアクション解除
+                await reaction.remove(member)
+        else:
+            invite_channel = member.voice.channel
+            tmp = invite_channel.category_id
+            lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
 
+            invite = await invite_channel.create_invite()
+            await lfg_ch.send(invite.url)
 
-        invite_channel = member.voice.channel
-        tmp = invite_channel.category_id
-        lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
-
-        invite = await invite_channel.create_invite()
-        await lfg_ch.send(invite.url)
-
-        for reaction in message.reactions: #リアクション解除
-            await reaction.remove(member)
+            for reaction in message.reactions: #リアクション解除
+                await reaction.remove(member)
 
 
 @bot.event
