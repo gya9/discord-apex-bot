@@ -45,7 +45,12 @@ class CommandCog(commands.Cog):
             lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
 
             invite = await invite_channel.create_invite()
-            await lfg_ch.send(invite.url + ' ' +  message)
+            
+            lfg_members = []
+            for m in invite_channel.members:
+                lfg_members.append(m.name) 
+
+            await lfg_ch.send(invite.url + ' ' +  message + '\n現在のメンバー\n```' + '\n'.join(lfg_members) + '```')
     
 
 def setup(bot):
