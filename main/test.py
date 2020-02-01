@@ -16,7 +16,7 @@ async def on_ready():
     commandCog.setup(bot)
 
     # # ロール付与用メッセージ
-    # role_channel = bot.get_channel(role_channel_id)
+    role_channel = bot.get_channel(role_channel_id)
     # text = "あなたの階級のボタンを押してください"
     # m = await role_channel.send(text)
     # await m.add_reaction('🟤')
@@ -30,6 +30,9 @@ async def on_ready():
     # m = await role_channel.send(text)
     # await m.add_reaction('🔄')
 
+    # text = ":arrow_down:クイック募集ボタン"
+    # m = await role_channel.send(text)
+    # await m.add_reaction('📢')
 
 @bot.event
 async def on_message(message):
@@ -83,6 +86,19 @@ async def on_raw_reaction_add(payload):
             role_remove = guild.get_role(role_id_remove)
             await member.remove_roles(role_remove)
 
+    if payload.message_id == quick_lfg_msg:  # クイック募集ボタン
+
+
+        invite_channel = member.voice.channel
+        tmp = invite_channel.category_id
+        lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
+
+        invite = await invite_channel.create_invite()
+        await lfg_ch.send(invite.url)
+
+        for reaction in message.reactions: #リアクション解除
+            await reaction.remove(member)
+
 
 @bot.event
 async def on_raw_reaction_remove(payload):
@@ -106,7 +122,6 @@ async def on_raw_reaction_remove(payload):
 @bot.event
 async def on_voice_state_update(member, before, after):
     guild = bot.get_guild(guild_id)
-    # cat_rank1 = guild.get_channel(664773527735500802)
 
     for i, cat in enumerate(list_vc_category):
         cat = guild.get_channel(cat)
