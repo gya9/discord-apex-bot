@@ -88,7 +88,7 @@ async def on_raw_reaction_add(payload):
 
     if payload.message_id == quick_lfg_msg:  # クイック募集ボタン
         try:
-            voice_channel = ctx.author.voice.channel
+            voice_channel = member.voice.channel
         except AttributeError:
             for reaction in message.reactions: #リアクション解除
                 await reaction.remove(member)
@@ -98,7 +98,12 @@ async def on_raw_reaction_add(payload):
             lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
 
             invite = await invite_channel.create_invite()
-            await lfg_ch.send(invite.url)
+            lfg_members = []
+
+            for m in invite_channel.members:
+                lfg_members.append(m.name) 
+            print('a')
+            await lfg_ch.send(invite.url + '\n```' + '\n'.join(lfg_members) + '```' )
 
             for reaction in message.reactions: #リアクション解除
                 await reaction.remove(member)
