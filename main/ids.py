@@ -15,6 +15,7 @@ predator_role_id = 664709106527109130
 #message id
 give_role_msg = 671742515128303627
 reset_role_msg = 671742528688750632
+quick_lfg_msg = 673254386725552181
 
 #list
 list_role_id_ranks = [
@@ -31,6 +32,13 @@ list_vc_category = [
     673244314167672893,
     673244389321211924
     ]
+
+list_lfg_id = [
+    673252148124975104,
+    673252761114116106,
+    673252835927785505,
+    673252893943398460
+]
 
 list_vc_category_str = [
     '初心者',
