@@ -2,8 +2,8 @@ import discord
 import cog.commandcog as commandCog
 from discord.ext import commands
 
+from ids import *
 from keys import *
-from token import *
 
 bot = commands.Bot(command_prefix='!')
 
@@ -39,8 +39,7 @@ async def on_message(message):
 
     if message.content.startswith('!bye'):
             '''終了用コマンド'''
-            m = ':wave:'
-            await message.channel.send(m)
+            await message.delete()
             await bot.close()
     
     # コマンド共存用
@@ -102,27 +101,31 @@ async def on_raw_reaction_remove(payload):
 
 @bot.event
 async def on_voice_state_update(member, before, after):
-    vc_root = bot.get_channel(664759994842873857)
-    vc_before = before.channel
-    vc_after = after.channel
     guild = bot.get_guild(guild_id)
+    vc_root = bot.get_channel(664759994842873857)
+    cat_rank1 = guild.get_channel(664773527735500802)
+    # vc_before = before.channel
+    # vc_after = after.channel
 
-    print(vc_before.members)
-    # f = True
-    # for vc in guild.voice_channels:
-    #     print(vc.members)
-    #     if vc.members == [] and vc.category_id == 664773527735500802:
-    #         if f:
-    #             f = False
-    #         else:
-    #             await vc.delete()
+    # print(vc_before.members)
+    flg_allfull = True
 
-    category = guild.get_channel(664773527735500802)
+    for vc in cat_rank1.channels:
+        # print(vc.members)
+        if vc.members == [] and vc.category_id == 664773527735500802:
+            if flg_allfull:
+                flg_allfull = False
+            else:
+                await vc.delete()
 
-    print(f)
-    if f:
-        await category.create_voice_channel('test')
-        
+    if flg_allfull:
+        await cat_rank1.create_voice_channel('tmp')
+
+    i=1
+    for vc in cat_rank1.channels:
+        await vc.edit(name='room{}'.format(i))
+        i+=1
+
 
 
 bot.run(discord_token)
