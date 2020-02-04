@@ -5,6 +5,7 @@ import json
 from discord.ext import commands
 from ids import *
 from keys import *
+from func import *
 
 class CommandCog(commands.Cog):
 
@@ -61,42 +62,28 @@ class CommandCog(commands.Cog):
     async def rank(self, ctx, message: str):
         guild = ctx.guild
 
-        try:
-            #request部分は後々別メソッドに分けたほうが良さそう
-            header = {'TRN-Api-Key': trn_token}
-            r = requests.get(trn_url + 'origin/' + message + '/', headers= header)
-            player_data = r.json()
-            stats = player_data['data']['segments'][0]['stats']
+        player_data, stats = trn_api_stats(message)
 
-            #2分探索
-            rank = bisect.bisect_left(list_rank_rp,stats['rankScore']['value']) - 1
+        #2分探索
+        rank = bisect.bisect_left(list_rank_rp,stats['rankScore']['value']) - 1
 
-            if rank == 20 :
-                embed = discord.Embed(title='Rank', description=list_rank_name[rank] + ' #' + str(stats['rankScore']['rank']), color=list_rank_colors[int(rank / 4)])
-            else:
-                embed = discord.Embed(title='Rank', description=list_rank_name[rank], color=list_rank_colors[int(rank / 4)])
-
-            for k,v in stats.items():
-                value = v['value']
-                if type(value) == float:
-                    value = int(value)
-                embed.add_field(name=v['displayName'], value=value)
-                
-
-            embed.set_author(name=message + 'さんの戦績', url='https://apex.tracker.gg/profile/pc/' + message, icon_url=player_data['data']['platformInfo']['avatarUrl'])
-            # print(json.dumps(player_data['data']['segments'][0], indent=2))
-            embed.set_thumbnail(url='https://trackercdn.com/cdn/apex.tracker.gg/ranks/' + list_rank_imgurl[rank] + '.png')
-
-        except requests.exceptions.RequestException as e:
-            print(e)
-            await ctx.channel.send('データを取得できませんでした。')
-            pass
-        except KeyError as e:
-            print(e)
-            await ctx.channel.send('指定されたプレイヤーは見つかりませんでした。')
-            pass
+        if rank == 20 :
+            embed = discord.Embed(title='Rank', description=list_rank_name[rank] + ' #' + str(stats['rankScore']['rank']), color=list_rank_colors[int(rank / 4)])
         else:
-            await ctx.channel.send(embed=embed)
+            embed = discord.Embed(title='Rank', description=list_rank_name[rank], color=list_rank_colors[int(rank / 4)])
+
+        for k,v in stats.items():
+            value = v['value']
+            if type(value) == float:
+                value = int(value)
+            embed.add_field(name=v['displayName'], value=value)
+            
+
+        embed.set_author(name=message + 'さんの戦績', url='https://apex.tracker.gg/profile/pc/' + message, icon_url=player_data['data']['platformInfo']['avatarUrl'])
+        # print(json.dumps(player_data['data']['segments'][0], indent=2))
+        embed.set_thumbnail(url='https://trackercdn.com/cdn/apex.tracker.gg/ranks/' + list_rank_imgurl[rank] + '.png')
+        await ctx.channel.send(embed=embed)
+
     
 
 def setup(bot):
