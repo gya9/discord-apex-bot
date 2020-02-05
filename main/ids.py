@@ -3,6 +3,7 @@ guild_id = 664685353348628481
 
 # channel id
 role_channel_id = 671736808710864906
+origin_channel_id = 673532406141157406
 
 # role id
 bronze_role_id = 664708794206519296

@@ -4,6 +4,7 @@ from discord.ext import commands
 
 from ids import *
 from keys import *
+from func import *
 
 bot = commands.Bot(command_prefix='!')
 
@@ -14,6 +15,11 @@ async def on_ready():
     guild = bot.get_guild(guild_id)
 
     commandCog.setup(bot)
+
+    # member全員のdiscordIDを取得
+    list_guild_member = guild.members
+    list_guild_member = [m.id for m in list_guild_member]
+    check_members(list_guild_member)
 
     # # ロール付与用メッセージ
     role_channel = bot.get_channel(role_channel_id)
@@ -35,16 +41,31 @@ async def on_ready():
     # await m.add_reaction('📢')
 
 @bot.event
+async def on_member_join(member):
+    # 新規memberのdiscordIDを取得
+    list_guild_member = [member.id]
+    check_members(list_guild_member)
+
+@bot.event
 async def on_message(message):
     if message.author.id == bot.user.id:
         return
 
     print('Message from {0.author}: {0.content}'.format(message))
 
-    if message.content.startswith('!bye'):
-        '''終了用コマンド'''
+    if message.content.startswith('!bye'): # 終了用コマンド
         await message.delete()
         await bot.close()
+
+    if message.channel.id == origin_channel_id:
+        a = add_origin_id(message.author.id, message.content)
+        if a:
+            m = message.author.name + 'さんのIDを登録しました'
+            await message.channel.send(m)
+        else:
+            m = message.author.name + 'さんのID登録に失敗しました\r\nIDが間違っていないかご確認ください'
+            await message.channel.send(m)
+
 
     # コマンド共存用
     await bot.process_commands(message)
