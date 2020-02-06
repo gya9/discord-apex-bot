@@ -21,6 +21,8 @@ async def on_ready():
     list_guild_member = [m.id for m in list_guild_member]
     check_member_list(list_guild_member)
 
+    # bot.bg_task = bot.loop.create_task(bot.my_background_task())
+
     # # ロール付与用メッセージ
     role_channel = bot.get_channel(role_channel_id)
     # text = "あなたの階級のボタンを押してください"
@@ -40,6 +42,14 @@ async def on_ready():
     # m = await role_channel.send(text)
     # await m.add_reaction('📢')
 
+
+# @bot.event
+# async def my_background_task():
+#     await bot.wait_until_ready()
+#     # await update_rank_all()
+#     await print('aa')
+#     await asyncio.sleep(20) # task runs every 60 seconds
+
 @bot.event
 async def on_member_join(member):
     # 新規memberのdiscordIDを取得
@@ -56,6 +66,10 @@ async def on_message(message):
     if message.content.startswith('!bye'): # 終了用コマンド
         await message.delete()
         await bot.close()
+
+
+    if message.content.startswith('!test'):
+        await message.channel.send(message.author.oid)
 
     if message.channel.id == origin_channel_id:
         a = add_origin_id(message.author.id, message.content)

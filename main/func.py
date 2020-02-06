@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 from ids import *
 from keys import *
+import discord
 
 def trn_api_stats(Origin_id):
     '''Tracker Network Apiによって、origin idからStatsデータを取得'''
@@ -59,6 +60,7 @@ def get_origin_id(discord_id):
 
 
 def get_rank(stats):
+    '''statsデータのrankscoreから「silver4」などのdivisionを算出し文字列を返す'''
     rank = bisect.bisect_left(list_rank_rp,stats['rankScore']['value']) - 1
 
     if rank == 20 :
@@ -89,3 +91,16 @@ async def create_lfg_msg(guild, voice_channel):
     print(invite_msg_str)
     return invite_msg_str
         
+
+def update_rank(origin_id, rank_str):
+    df = pd.read_csv('users.csv')
+    df.apex_rank[df.origin_id == origin_id] = rank_str
+    df.to_csv('users.csv', index=False)
+
+
+async def update_rank_all():
+    df = pd.read_csv('users.csv')
+    for origin_id in df['origin_id'].dropna().values:
+        _, stats = trn_api_stats(origin_id)
+        rank_str, _ = get_rank(stats)
+        update_rank(origin_id, rank_str)

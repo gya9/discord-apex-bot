@@ -2,7 +2,7 @@ import re, requests, bisect
 import discord
 # import sys
 import json
-from discord.ext import commands
+from discord.ext import commands, tasks
 from ids import *
 from keys import *
 from func import *
@@ -11,6 +11,15 @@ class CommandCog(commands.Cog):
 
     def __init__(self, bot):
         self.bot = bot  
+        self.index = 0
+        self.update_task.start()
+
+    @tasks.loop(minutes=30)
+    async def update_task(self):
+        '''30分おきに全userのrank情報を更新'''
+        update_rank_all()
+        print('updated')
+
 
     @commands.command()
     async def lfg(self, ctx, message: str):
@@ -66,7 +75,12 @@ class CommandCog(commands.Cog):
             embed.set_thumbnail(url='https://trackercdn.com/cdn/apex.tracker.gg/ranks/' + list_rank_imgurl[rank] + '.png')
             await ctx.channel.send(embed=embed)
 
-    
+            update_rank(ctx.author.id, rank_str)
+
+    @commands.command()
+    async def update(self, ctx):
+        update_rank_all()
+
 
 def setup(bot):
     bot.add_cog(CommandCog(bot))
