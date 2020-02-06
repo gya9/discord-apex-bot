@@ -65,3 +65,27 @@ def get_rank(stats):
         return list_rank_name[rank] + ' #' + str(stats['rankScore']['rank']), rank
     else:
         return list_rank_name[rank], rank
+
+async def lfg_msg_create(guild, voice_channel):
+
+    tmp = voice_channel.category_id
+    lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
+
+    invite = await voice_channel.create_invite()
+    
+    lfg_members = []
+    for m in voice_channel.members:
+        if not get_origin_id(m.id):
+            lfg_members.append(m.name)
+        else:
+            origin_id = get_origin_id(m.id)
+            if not trn_api_stats(origin_id):
+                lfg_members.append(m.name + '   Origin:' + origin_id)
+            else:
+                player_data, stats = trn_api_stats(origin_id)
+                rank_str, rank = get_rank(stats)
+                lfg_members.append(m.name + '   Origin:' + origin_id + '   Rank:' + rank_str)
+    invite_msg_str = invite.url + ' \n現在のメンバー\n```' + '\n'.join(lfg_members) + '```'
+    print(invite_msg_str)
+    return invite_msg_str
+        

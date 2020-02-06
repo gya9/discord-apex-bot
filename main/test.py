@@ -108,35 +108,19 @@ async def on_raw_reaction_add(payload):
             await member.remove_roles(role_remove)
 
     if payload.message_id == quick_lfg_msg:  # クイック募集ボタン
+        lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(member.voice.channel.category_id)])
         try:
-            voice_channel = member.voice.channel
-        except AttributeError:
-            for reaction in message.reactions: #リアクション解除
-                await reaction.remove(member)
+            invite_str = await lfg_msg_create(guild, member.voice.channel)
+        except AttributeError as e:
+            print(e)
+            pass
         else:
-            invite_channel = member.voice.channel
-            tmp = invite_channel.category_id
-            lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
+            await lfg_ch.send(invite_str)
+        for reaction in message.reactions: #リアクション解除
+            await reaction.remove(member)
 
-            invite = await invite_channel.create_invite()
-
-            lfg_members = []
-            for m in invite_channel.members:
-                if not get_origin_id(m.id):
-                    lfg_members.append(m.name)
-                else:
-                    origin_id = get_origin_id(m.id)
-                    if not trn_api_stats(origin_id):
-                        lfg_members.append(m.name + '   Origin:' + origin_id)
-                    else:
-                        player_data, stats = trn_api_stats(origin_id)
-                        rank_str, rank = get_rank(stats)
-                        lfg_members.append(m.name + '   Origin:' + origin_id + '   Rank:' + rank_str)
-
-            await lfg_ch.send(invite.url + '\n現在のメンバー\n```' + '\n'.join(lfg_members) + '```' )
-
-            for reaction in message.reactions: #リアクション解除
-                await reaction.remove(member)
+        for reaction in message.reactions: #リアクション解除
+            await reaction.remove(member)
 
 
 @bot.event

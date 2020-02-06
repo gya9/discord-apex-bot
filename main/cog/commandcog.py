@@ -39,33 +39,9 @@ class CommandCog(commands.Cog):
 
     @commands.command()
     async def bo(self, ctx, message: str):
-        guild = ctx.guild
-
-        try:
-            invite_channel = ctx.author.voice.channel
-        except AttributeError as e:
-            print(e)
-            pass
-        else:
-            tmp = invite_channel.category_id
-            lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
-
-            invite = await invite_channel.create_invite()
-            
-            lfg_members = []
-            for m in invite_channel.members:
-                if not get_origin_id(m.id):
-                    lfg_members.append(m.name)
-                else:
-                    origin_id = get_origin_id(m.id)
-                    if not trn_api_stats(origin_id):
-                        lfg_members.append(m.name + '   Origin:' + origin_id)
-                    else:
-                        player_data, stats = trn_api_stats(origin_id)
-                        rank_str, rank = get_rank(stats)
-                        lfg_members.append(m.name + '   Origin:' + origin_id + '   Rank:' + rank_str)
-
-            await lfg_ch.send(invite.url + ' ' +  message + '\n現在のメンバー\n```' + '\n'.join(lfg_members) + '```')
+        lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(ctx.author.voice.channel)])
+        invite_str = lfg_msg_create(ctx.guild, ctx.author.voice.channel)
+        await lfg_ch.send(message + invite_str)
 
     @commands.command()
     async def rank(self, ctx, message: str):
