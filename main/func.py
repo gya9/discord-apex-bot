@@ -45,3 +45,14 @@ def check_member_list(list_member_id):
             df = pd.concat([df,_df], ignore_index=True, sort=False)
 
     df.to_csv('users.csv',index=False)
+
+def get_origin_id(discord_id):
+    return False
+
+def get_rank(stats):
+    rank = bisect.bisect_left(list_rank_rp,stats['rankScore']['value']) - 1
+
+    if rank == 20 :
+        return list_rank_name[rank] + ' #' + str(stats['rankScore']['rank']), rank
+    else:
+        return list_rank_name[rank], rank

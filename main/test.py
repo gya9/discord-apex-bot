@@ -19,7 +19,7 @@ async def on_ready():
     # member全員のdiscordIDを取得
     list_guild_member = guild.members
     list_guild_member = [m.id for m in list_guild_member]
-    check_members(list_guild_member)
+    check_member_list(list_guild_member)
 
     # # ロール付与用メッセージ
     role_channel = bot.get_channel(role_channel_id)
@@ -122,7 +122,16 @@ async def on_raw_reaction_add(payload):
 
             lfg_members = []
             for m in invite_channel.members:
-                lfg_members.append(m.name) 
+                if not get_origin_id(m.id):
+                    lfg_members.append(m.name)
+                else:
+                    origin_id = get_origin_id(m.id)
+                    if not trn_api_stats(origin_id):
+                        lfg_members.append(m.name + '   Origin:' + origin_id)
+                    else:
+                        player_data, stats = trn_api_stats(origin_id)
+                        rank_str, rank = get_rank(stats)
+                        lfg_members.append(m.name + '   Origin:' + origin_id + '   Rank:' + rank_str)
 
             await lfg_ch.send(invite.url + '\n現在のメンバー\n```' + '\n'.join(lfg_members) + '```' )
 
@@ -169,6 +178,5 @@ async def on_voice_state_update(member, before, after):
 
         for j, vc in enumerate(cat.channels,1):
             await vc.edit(name='{}{}'.format(list_vc_category_str[i], str(j).zfill(2)))
-
 
 bot.run(discord_token)
