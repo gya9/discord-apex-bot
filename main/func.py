@@ -28,7 +28,7 @@ def add_origin_id(discord_id, origin_id):
     
     df = pd.read_csv('users.csv')
     df.origin_id[df.discord_id == discord_id] = origin_id
-    df.to_csv('users.csv')
+    df.to_csv('users.csv', index=False)
     return True
 
 
@@ -44,10 +44,19 @@ def check_member_list(list_member_id):
             _df = _df.append(add_row, ignore_index=True)
             df = pd.concat([df,_df], ignore_index=True, sort=False)
 
-    df.to_csv('users.csv',index=False)
+    df.to_csv('users.csv', index=False)
+
 
 def get_origin_id(discord_id):
-    return False
+    '''users.csvに登録されているoriginIDを参照'''
+    df = pd.read_csv('users.csv')
+    ans_origin_id = df.origin_id[df.discord_id == discord_id].values[0]
+
+    if ans_origin_id == np.NaN:
+        return False
+    else:
+        return ans_origin_id
+
 
 def get_rank(stats):
     rank = bisect.bisect_left(list_rank_rp,stats['rankScore']['value']) - 1
