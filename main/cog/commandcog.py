@@ -40,7 +40,7 @@ class CommandCog(commands.Cog):
     @commands.command()
     async def bo(self, ctx, message: str):
         lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(ctx.author.voice.channel)])
-        invite_str = lfg_msg_create(ctx.guild, ctx.author.voice.channel)
+        invite_str = create_lfg_msg(ctx.guild, ctx.author.voice.channel)
         await lfg_ch.send(message + invite_str)
 
     @commands.command()

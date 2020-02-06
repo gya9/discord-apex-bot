@@ -66,7 +66,7 @@ def get_rank(stats):
     else:
         return list_rank_name[rank], rank
 
-async def lfg_msg_create(guild, voice_channel):
+async def create_lfg_msg(guild, voice_channel):
 
     tmp = voice_channel.category_id
     lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])

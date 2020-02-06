@@ -110,7 +110,7 @@ async def on_raw_reaction_add(payload):
     if payload.message_id == quick_lfg_msg:  # クイック募集ボタン
         lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(member.voice.channel.category_id)])
         try:
-            invite_str = await lfg_msg_create(guild, member.voice.channel)
+            invite_str = await create_lfg_msg(guild, member.voice.channel)
         except AttributeError as e:
             print(e)
             pass
