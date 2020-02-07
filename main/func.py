@@ -6,7 +6,7 @@ from keys import *
 import discord
 
 def trn_api_stats(Origin_id):
-    '''Tracker Network Apiによって、origin idからStatsデータを取得'''
+    '''Tracker Network APIによって、origin idからStatsデータを取得'''
     try:
         header = {'TRN-Api-Key': trn_token}
         r = requests.get(trn_url + 'origin/' + Origin_id + '/', headers= header)
@@ -50,13 +50,9 @@ def check_member_list(list_member_id):
 
 def get_origin_id(discord_id):
     '''users.csvに登録されているoriginIDを参照'''
-    df = pd.read_csv('users.csv')
+    df = pd.read_csv('users.csv').fillna('')
     ans_origin_id = df.origin_id[df.discord_id == discord_id].values[0]
-
-    if ans_origin_id == np.NaN:
-        return False
-    else:
-        return ans_origin_id
+    return ans_origin_id
 
 
 def get_rank(stats):
@@ -68,8 +64,8 @@ def get_rank(stats):
     else:
         return list_rank_name[rank], rank
 
-async def create_lfg_msg(guild, voice_channel):
-
+async def create_lfg_msg(guild, voice_channel, message=False):
+    '''募集用のチャンネル参加ボタン付きテキストメッセージを作成'''
     tmp = voice_channel.category_id
     lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(tmp)])
 
@@ -77,28 +73,34 @@ async def create_lfg_msg(guild, voice_channel):
     
     lfg_members = []
     for m in voice_channel.members:
-        if not get_origin_id(m.id):
+        origin_id = get_origin_id(m.id)
+        if origin_id == '':
             lfg_members.append(m.name)
         else:
-            origin_id = get_origin_id(m.id)
             if not trn_api_stats(origin_id):
                 lfg_members.append(m.name + '   Origin:' + origin_id)
             else:
                 player_data, stats = trn_api_stats(origin_id)
                 rank_str, rank = get_rank(stats)
                 lfg_members.append(m.name + '   Origin:' + origin_id + '   Rank:' + rank_str)
-    invite_msg_str = invite.url + ' \n現在のメンバー\n```' + '\n'.join(lfg_members) + '```'
+    if message:
+        message = '「{}」  参加はこちらから↓'.format(message)
+    else:
+        message = '参加はこちらから↓'
+    invite_msg_str = invite.url + '\n```' + '\n'.join(lfg_members) + '\n' + message + '```'
     print(invite_msg_str)
     return invite_msg_str
         
 
 def update_rank(origin_id, rank_str):
+    '''指定したoriginidを持つユーザーのapex_rank列を更新'''
     df = pd.read_csv('users.csv')
     df.apex_rank[df.origin_id == origin_id] = rank_str
     df.to_csv('users.csv', index=False)
 
 
-async def update_rank_all():
+def update_rank_all():
+    '''user.csvに登録された全てのoriginidについてapiを叩いてapex_rankを更新'''
     df = pd.read_csv('users.csv')
     for origin_id in df['origin_id'].dropna().values:
         _, stats = trn_api_stats(origin_id)

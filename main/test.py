@@ -7,7 +7,7 @@ from keys import *
 from func import *
 
 bot = commands.Bot(command_prefix='!')
-
+origin_channel = bot.get_channel(origin_channel_id)
 
 @bot.event
 async def on_ready():
@@ -21,34 +21,6 @@ async def on_ready():
     list_guild_member = [m.id for m in list_guild_member]
     check_member_list(list_guild_member)
 
-    # bot.bg_task = bot.loop.create_task(bot.my_background_task())
-
-    # # ロール付与用メッセージ
-    role_channel = bot.get_channel(role_channel_id)
-    # text = "あなたの階級のボタンを押してください"
-    # m = await role_channel.send(text)
-    # await m.add_reaction('🟤')
-    # await m.add_reaction('⚪')
-    # await m.add_reaction('🟡')
-    # await m.add_reaction('🔵')
-    # await m.add_reaction('🔷')
-    # await m.add_reaction('🔴')
-
-    # text = ":arrow_down:階級ロールリセットボタン"
-    # m = await role_channel.send(text)
-    # await m.add_reaction('🔄')
-
-    # text = ":arrow_down:クイック募集ボタン"
-    # m = await role_channel.send(text)
-    # await m.add_reaction('📢')
-
-
-# @bot.event
-# async def my_background_task():
-#     await bot.wait_until_ready()
-#     # await update_rank_all()
-#     await print('aa')
-#     await asyncio.sleep(20) # task runs every 60 seconds
 
 @bot.event
 async def on_member_join(member):
@@ -67,11 +39,8 @@ async def on_message(message):
         await message.delete()
         await bot.close()
 
-
-    if message.content.startswith('!test'):
-        await message.channel.send(message.author.oid)
-
-    if message.channel.id == origin_channel_id:
+    if message.channel == origin_channel:
+        '''id入力チャンネルにメッセージが入ったときの応答'''
         a = add_origin_id(message.author.id, message.content)
         if a:
             m = message.author.name + 'さんのIDを登録しました'
@@ -122,19 +91,32 @@ async def on_raw_reaction_add(payload):
             await member.remove_roles(role_remove)
 
     if payload.message_id == quick_lfg_msg:  # クイック募集ボタン
-        lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(member.voice.channel.category_id)])
-        try:
-            invite_str = await create_lfg_msg(guild, member.voice.channel)
-        except AttributeError as e:
-            print(e)
-            pass
-        else:
-            await lfg_ch.send(invite_str)
-        for reaction in message.reactions: #リアクション解除
-            await reaction.remove(member)
 
-        for reaction in message.reactions: #リアクション解除
-            await reaction.remove(member)
+        if not member.voice: # ボイスチャンネルにいなかったときの応答
+            role_channel = bot.get_channel(role_channel_id)
+            text = member.name + 'さんはボイスチャンネルにいないので募集できません\r\nボイスチャンネルに入ってからボタンを再度押してください'
+            m = await role_channel.send(text)
+
+            for reaction in message.reactions: #リアクション解除
+                await reaction.remove(member)
+
+            await asyncio.sleep(10)
+            await m.delete()
+
+        else: # ボイスチャンネルにいたときの応答
+            lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(member.voice.channel.category_id)])
+            try:
+                invite_str = await create_lfg_msg(guild, member.voice.channel)
+            except AttributeError as e:
+                print(e)
+                pass
+            else:
+                await lfg_ch.send(invite_str)
+            for reaction in message.reactions: #リアクション解除
+                await reaction.remove(member)
+
+            for reaction in message.reactions: #リアクション解除
+                await reaction.remove(member)
 
 
 @bot.event
@@ -158,6 +140,7 @@ async def on_raw_reaction_remove(payload):
 
 @bot.event
 async def on_voice_state_update(member, before, after):
+    '''VCに変更があった場合、カテゴリ毎の空き部屋を1つ以外削除してチャンネル名を整理'''
     guild = bot.get_guild(guild_id)
 
     for i, cat in enumerate(list_vc_category):

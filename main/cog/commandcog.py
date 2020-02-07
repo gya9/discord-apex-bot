@@ -14,9 +14,9 @@ class CommandCog(commands.Cog):
         self.index = 0
         self.update_task.start()
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(hours=1)
     async def update_task(self):
-        '''30分おきに全userのrank情報を更新'''
+        '''1時間おきに全userのrank情報を更新'''
         update_rank_all()
         print('updated')
 
@@ -48,9 +48,11 @@ class CommandCog(commands.Cog):
 
     @commands.command()
     async def bo(self, ctx, message: str):
-        lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(ctx.author.voice.channel)])
-        invite_str = create_lfg_msg(ctx.guild, ctx.author.voice.channel)
-        await lfg_ch.send(message + invite_str)
+        guild = ctx.guild
+        cat_id = ctx.author.voice.channel.category.id
+        lfg_ch = guild.get_channel(list_lfg_id[list_vc_category.index(cat_id)])
+        invite_str = await create_lfg_msg(guild, ctx.author.voice.channel, message)
+        await lfg_ch.send(invite_str)
 
     @commands.command()
     async def rank(self, ctx, message: str):
