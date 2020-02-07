@@ -17,7 +17,7 @@ class CommandCog(commands.Cog):
     @tasks.loop(hours=1)
     async def update_task(self):
         '''1時間おきに全userのrank情報を更新'''
-        update_rank_all()
+        update_stats_all()
         print('updated')
 
 
@@ -63,7 +63,7 @@ class CommandCog(commands.Cog):
         else:
             player_data, stats = trn_api_stats(message)
             
-            rank_str, rank = get_rank(stats)
+            rank_str, rank = calculate_rank(stats)
             embed = discord.Embed(title='Rank', description=list_rank_name[rank], color=list_rank_colors[int(rank / 4)])
 
             for k,v in stats.items():
@@ -77,11 +77,11 @@ class CommandCog(commands.Cog):
             embed.set_thumbnail(url='https://trackercdn.com/cdn/apex.tracker.gg/ranks/' + list_rank_imgurl[rank] + '.png')
             await ctx.channel.send(embed=embed)
 
-            update_rank(ctx.author.id, rank_str)
+            update_stats(ctx.author.id, rank_str)
 
     @commands.command()
     async def update(self, ctx):
-        update_rank_all()
+        update_stats_all()
 
 
 def setup(bot):
