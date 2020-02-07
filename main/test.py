@@ -1,10 +1,13 @@
 import discord
 import cog.commandcog as commandCog
 from discord.ext import commands
+import warnings
 
 from ids import *
 from keys import *
 from func import *
+
+warnings.simplefilter('ignore', pd.core.common.SettingWithCopyWarning)
 
 bot = commands.Bot(command_prefix='!')
 
