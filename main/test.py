@@ -7,7 +7,6 @@ from keys import *
 from func import *
 
 bot = commands.Bot(command_prefix='!')
-origin_channel = bot.get_channel(origin_channel_id)
 
 @bot.event
 async def on_ready():
@@ -39,7 +38,7 @@ async def on_message(message):
         await message.delete()
         await bot.close()
 
-    if message.channel == origin_channel:
+    if message.channel.id == origin_channel_id:
         '''id入力チャンネルにメッセージが入ったときの応答'''
         a = add_origin_id(message.author.id, message.content)
         if a:
