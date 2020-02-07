@@ -84,6 +84,11 @@ class CommandCog(commands.Cog):
         update_stats_all()
 
 
+    @commands.command()
+    async def purge(self, ctx):
+        channel = ctx.channel
+        await channel.purge()
+
 def setup(bot):
     bot.add_cog(CommandCog(bot))
     print('cog setup done')
